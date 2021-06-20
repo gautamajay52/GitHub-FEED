@@ -1,0 +1,30 @@
+{
+    "name": "GitHub-RSS",
+    "description": "Github follow notifier via telegram bot",
+    "keywords": [
+        "telegram",
+        "github",
+        "RSS"
+    ],
+    "repository": "https://github.com/gautamajay52/GitHub-RSS",
+    "success_url": "https://t.me/gbotstoresupport",
+    "website": "https://github.com/gautamajay52",
+    "env": {
+        "FEED": {
+            "description": "Go https://github.com/ to get yours.",
+            "value": ""
+        },
+        "DATABASE": {
+            "description": "Go https://www.elephantsql.com/ to create one.",
+            "value": ""
+        },
+        "TOKEN": {
+            "description": "From BotFather",
+            "value": ""
+        },
+        "ID": {
+            "description": "Your ID or group ID",
+            "value": ""
+        }
+    }
+}
