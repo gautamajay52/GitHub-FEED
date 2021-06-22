@@ -17,6 +17,11 @@ const select_query = 'select * from Github where id=$1'
 const client = new Client(process.env.DATABASE)
 client.connect()
 
+const verify_owner = (query) => {
+    var reg = new RegExp('https?:\/\/github.com\/(.+)\.private.atom\?.+=[A-Z0-9]+', "g")
+    return Array.from(`${process.env.FEED}`.matchAll(reg), m => m[1])[0]
+}
+
 const send = async (query) => {
     try {
         const res = await fetch(`https://api.telegram.org/bot${process.env.TOKEN}/sendMessage`, {
@@ -30,6 +35,11 @@ const send = async (query) => {
 
 
 const follow_checker = async () => {
+    const own_usr = verify_owner()
+    if (!own_usr) {
+        console.warn("Invalid FEED URL")
+        return
+    }
     var out = await (await fetch(process.env.FEED)).text()
     await parseString(out, async (err, result) => {
         for (var match of result.feed.entry) {
@@ -42,9 +52,14 @@ const follow_checker = async () => {
                 if (out.rowCount == 0) {
                     var owner = match.link[0].$.href
                     var on_date = match.updated[0]
-                    var mess = `🤖: [${follower}](${follower_url}) *started following* [${owner.split("/")[3]}](${owner}) *on* _${on_date}_ `
-                    const out2 = await client.query(insert_query, [follower_username, on_date])
-                    send(mess)
+                    var owner_username = owner.split("/")[3]
+                    if (owner_username === own_usr) {
+                        var mess = `🤖: [${follower}](${follower_url}) *started following* [${owner_username}](${owner}) *on* _${on_date}_ `
+                        const out2 = await client.query(insert_query, [follower_username, on_date])
+                        send(mess)
+                    } else {
+                        console.log(`🤖: ${follower} started following ${owner_username} on ${on_date}`)
+                    }
                 }
             }
         }
